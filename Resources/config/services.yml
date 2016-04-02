@@ -1,0 +1,31 @@
+services:
+#    gfb.common.example:
+#        class:     GFB\CommonBundle\Example
+#        arguments: ["@service_id", "plain_value", "%parameter%"]
+#        calls:
+#            - [setService, ["@service_id"]]
+#        tags:
+#            - { name: twig.extension }
+#            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+    gfb_common.view.listener:
+        class: GFB\CommonBundle\EventListener\SerializedViewListener
+        tags:
+            - name: kernel.event_listener
+              event: kernel.exception
+              method: onKernelException
+              priority: 1024
+            - name: kernel.event_listener
+              event: kernel.view
+              method: onKernelView
+        calls:
+            - [ setReader, [ @annotation_reader ] ]
+            - [ setValidator, [ @validator ] ]
+            - [ setSerializer, [ @serializer ] ]
+
+    gfb.common.media.form.type:
+        class: GFB\CommonBundle\Form\Type\MediaFileFormType
+        arguments:
+            - @doctrine.orm.entity_manager
+            - @sonata.media.manager.media
+        tags:
+            - { name: form.type, alias: gfb_media_file_type }

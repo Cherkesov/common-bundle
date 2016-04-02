@@ -1,0 +1,103 @@
+{% extends 'form_div_layout.html.twig' %}
+
+
+{% block gfb_media_file_type_widget %}
+
+    {#{{ dump(form.id) }}#}
+
+    {{ form_row(form.id) }}
+
+    <div id="{{ id }}__preview_wrap">
+        {% if data is defined and data is not null %}
+            {% thumbnail data, preview_format %}
+        {% endif %}
+    </div>
+
+    <div id="{{ id }}_dropZone">
+        Drop files here...
+        <div id="{{ id }}_clickHere">
+            or click here..
+            {{ form_row(form.binaryContent) }}
+        </div>
+    </div>
+    <div>
+        {{ form_row(form.unlink) }}
+    </div>
+    <div>
+        <progress id="{{ id }}_progressBar" value="0"
+                  max="100" style="width:300px;"></progress>
+        <h3 id="{{ id }}_status"></h3>
+        <p id="{{ id }}_loaded_n_total"></p>
+    </div>
+
+    {% if auto_upload == false %}
+        <div>
+            <button type="button" id="{{ id }}_start_upload">Upload!</button>
+        </div>
+    {% endif %}
+
+    <script>
+        (function () {
+            var fileEl = document.getElementById('{{ form.binaryContent.vars.id }}');
+            var statusEl = document.getElementById('{{ id }}_status');
+            var progressBarEl = document.getElementById('{{ id }}_progressBar');
+            var loadedEl = document.getElementById('{{ id }}_loaded_n_total');
+
+            var listener = function (e) {
+                var formData = new FormData();
+                formData.append('file', fileEl.files[0]);
+                formData.append('context', '{{ context }}');
+                formData.append('preview_format', '{{ preview_format }}');
+
+                {#{% if form.id.vars.value > 0 %}
+                formData.append('id', {{ form.id.vars.value }});
+                {% endif %}#}
+
+                var ajax = new XMLHttpRequest();
+                ajax.upload.addEventListener('progress', function (event) {
+                    loadedEl.innerHTML = 'Uploaded ' + event.loaded + ' bytes of ' + event.total;
+                    var percent = (event.loaded / event.total) * 100;
+                    progressBarEl.value = Math.round(percent);
+                    statusEl.innerHTML = Math.round(percent) + '% uploaded... please wait';
+                }, false);
+                ajax.addEventListener('load', function (event) {
+//                    statusEl.innerHTML = event.target.responseText;
+                    var response = JSON.parse(event.target.responseText);
+                    progressBarEl.value = 0;
+
+                    var previewWrapEl = document.getElementById('{{ id }}__preview_wrap');
+                    while (previewWrapEl.firstChild) {
+                        previewWrapEl.removeChild(previewWrapEl.firstChild);
+                    }
+
+                    if (response.path != undefined) {
+                        var previewEl = document.createElement('img');
+                        previewEl.src = response.path;
+                        previewWrapEl.appendChild(previewEl);
+
+                        document.getElementById('{{ form.id.vars.id }}').value = response.id;
+                    }
+                }, false);
+                ajax.addEventListener('error', function (event) {
+                    statusEl.innerHTML = 'Upload Failed';
+                }, false);
+                ajax.addEventListener('abort', function (event) {
+                    statusEl.innerHTML = 'Upload Aborted';
+                }, false);
+                ajax.open('POST', '{{ path('gfb__common__media_file__upload') }}');
+                ajax.send(formData);
+            };
+
+            {% if auto_upload == true %}
+            fileEl.onchange = function (e) {
+                listener(e);
+            };
+            {% else %}
+            document.getElementById('{{ id }}_start_upload')
+                    .addEventListener('click', listener, true);
+            {% endif %}
+
+        })();
+    </script>
+
+{% endblock gfb_media_file_type_widget %}

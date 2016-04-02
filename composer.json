@@ -1,0 +1,35 @@
+{
+  "name": "gfb/common-bundle",
+  "license": "MIT",
+  "description": "Common features",
+  "type": "symfony-bundle",
+  "authors": [
+    {
+      "name": "Cherkesov Sergey",
+      "email": "go.for.broke1006@gmail.com"
+    }
+  ],
+  "keywords": [
+    "gfb", "common", "bundle"
+  ],
+  "require": {
+    "symfony/symfony": "~2.7",
+    "symfony/monolog-bundle": "~2.4",
+    "friendsofsymfony/rest-bundle": "^1.7",
+    "sonata-project/media-bundle": "^2.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "GFB\\CommonBundle": ""
+    }
+  },
+  "repositories": [
+    {
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}

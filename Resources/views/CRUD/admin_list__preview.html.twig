@@ -1,0 +1,15 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+{% block field %}
+    {#{{ dump() }}#}
+
+    {% if value.binaryContent is defined
+    and value.width is defined
+    and value.height is defined %}
+        <div>
+            {% thumbnail value, 'reference' with {'width': '128'} %}
+        </div>
+        <div>{{ value.name }}</div>
+    {% else %}
+        <span>{{ 'label.no_picture'|trans({}, 'GFBCommonBundle') }}</span>
+    {% endif %}
+{% endblock %}
