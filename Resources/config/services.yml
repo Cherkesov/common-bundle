@@ -29,3 +29,10 @@ services:
             - @sonata.media.manager.media
         tags:
             - { name: form.type, alias: gfb_media_file_type }
+
+    gfb.common.image_file.form.type:
+        class: GFB\CommonBundle\Form\Type\ImageFileFormType
+        arguments:
+            - @sonata.media.pool
+        tags:
+            - { name: form.type, alias: gfb_image_file_type }

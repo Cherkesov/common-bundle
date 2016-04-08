@@ -101,3 +101,11 @@
     </script>
 
 {% endblock gfb_media_file_type_widget %}
+
+
+{% block gfb_image_file_type_widget %}
+    {{ dump() }}
+
+    <canvas></canvas>
+    {{ block('sonata_media_type_widget') }}
+{% endblock gfb_image_file_type_widget %}
