@@ -104,8 +104,83 @@
 
 
 {% block gfb_image_file_type_widget %}
-    {{ dump() }}
+    {#{{ dump() }}#}
 
-    <canvas></canvas>
-    {{ block('sonata_media_type_widget') }}
+    <canvas id="{{ id }}__canvas" width="320" height="240"></canvas>
+
+    {{ block('form_widget') }}
+
+    <script>
+        (function () {
+            /**
+             * @param {Image} image
+             * @returns {boolean}
+             */
+            function isLandscape(image) {
+                return image.width >= image.height;
+            }
+
+            var pw = '{{ preview.width }}',
+                    ph = '{{ preview.height }}',
+                    canvasEl = document.getElementById('{{ id }}__canvas'),
+                    fileEl = document.getElementById('{{ form.binaryContent.vars.id }}');
+            var context = canvasEl.getContext('2d');
+
+            fileEl.onchange = function (e) {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = new Image();
+                        img.onload = function () {
+                            var mt = 0, ml = 0, proportion = 1;
+
+//                            console.log('Before resize: ' + img.width + ' ' + img.height);
+
+                            if (pw > ph) {
+                                if (pw > 0 && ph > 0) {
+                                    proportion = isLandscape(img) ?
+                                    ph / img.height :
+                                    pw / img.width;
+                                } else if (pw > 0) {
+                                    proportion = pw / img.width;
+                                } else if (ph > 0) {
+                                    proportion = ph / img.height;
+                                }
+                            } else {
+                                if (pw > 0 && ph > 0) {
+                                    proportion = isLandscape(img) ?
+                                    pw / img.width :
+                                    ph / img.height;
+                                } else if (ph > 0) {
+                                    proportion = ph / img.height;
+                                }
+                                else if (pw > 0) {
+                                    proportion = pw / img.width;
+                                }
+                            }
+
+                            img.width *= proportion;
+                            img.height *= proportion;
+
+//                            console.log('After resize: ' + img.width + ' ' + img.height);
+
+                            if (pw > 0 && ph > 0) {
+                                ml = -(img.width - pw) / 2;
+                                mt = -(img.height - ph) / 2;
+                            }
+
+//                            console.log('Margin: ' + ml + ' ' + mt);
+
+                            canvasEl.width = (pw > 0) ? pw : img.width;
+                            canvasEl.height = (ph > 0) ? ph : img.height;
+
+                            context.drawImage(img, ml, mt, img.width, img.height);
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            };
+        })();
+    </script>
 {% endblock gfb_image_file_type_widget %}

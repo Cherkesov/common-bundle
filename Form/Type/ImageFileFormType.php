@@ -9,6 +9,7 @@
 namespace GFB\CommonBundle\Form\Type;
 
 
+use Sonata\MediaBundle\Form\Type\MediaType;
 use Sonata\MediaBundle\Provider\Pool;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
@@ -64,6 +65,7 @@ class ImageFileFormType extends AbstractType
             array_merge(
                 $parentOptions,
                 [
+                    'context' => null,
                     'provider' => 'sonata.media.provider.image',
                     'preview_format' => 'reference',
                 ]
