@@ -120,7 +120,8 @@
                 return image.width >= image.height;
             }
 
-            var pw = '{{ preview.width }}',
+            var resizerEnabled = !!'{{ preview.resizer }}';
+            pw = '{{ preview.width }}',
                     ph = '{{ preview.height }}',
                     canvasEl = document.getElementById('{{ id }}__canvas'),
                     fileEl = document.getElementById('{{ form.binaryContent.vars.id }}');
@@ -132,49 +133,61 @@
                     reader.onload = function (e) {
                         var img = new Image();
                         img.onload = function () {
-                            var mt = 0, ml = 0, proportion = 1;
 
+                            if (resizerEnabled) {
+
+                                var mt = 0, ml = 0, proportion = 1;
 //                            console.log('Before resize: ' + img.width + ' ' + img.height);
-
-                            if (pw > ph) {
-                                if (pw > 0 && ph > 0) {
-                                    proportion = isLandscape(img) ?
-                                    ph / img.height :
-                                    pw / img.width;
-                                } else if (pw > 0) {
-                                    proportion = pw / img.width;
-                                } else if (ph > 0) {
-                                    proportion = ph / img.height;
+                                if (pw > ph) {
+                                    if (pw > 0 && ph > 0) {
+                                        proportion = isLandscape(img) ?
+                                        ph / img.height :
+                                        pw / img.width;
+                                    } else if (pw > 0) {
+                                        proportion = pw / img.width;
+                                    } else if (ph > 0) {
+                                        proportion = ph / img.height;
+                                    }
+                                } else {
+                                    if (pw > 0 && ph > 0) {
+                                        proportion = isLandscape(img) ?
+                                        pw / img.width :
+                                        ph / img.height;
+                                    } else if (ph > 0) {
+                                        proportion = ph / img.height;
+                                    }
+                                    else if (pw > 0) {
+                                        proportion = pw / img.width;
+                                    }
                                 }
+
+                                img.width *= proportion;
+                                img.height *= proportion;
+
+//                                console.log('After resize: ' + img.width + ' ' + img.height);
+
+                                if (pw > 0 && ph > 0) {
+                                    ml = -(img.width - pw) / 2;
+                                    mt = -(img.height - ph) / 2;
+                                }
+
+//                                console.log('Margin: ' + ml + ' ' + mt);
+
+                                canvasEl.width = (pw > 0) ? pw : img.width;
+                                canvasEl.height = (ph > 0) ? ph : img.height;
+
+                                context.drawImage(img, ml, mt, img.width, img.height);
                             } else {
-                                if (pw > 0 && ph > 0) {
-                                    proportion = isLandscape(img) ?
-                                    pw / img.width :
-                                    ph / img.height;
-                                } else if (ph > 0) {
-                                    proportion = ph / img.height;
-                                }
-                                else if (pw > 0) {
-                                    proportion = pw / img.width;
-                                }
+                                if (pw > 0)
+                                    img.width = pw;
+                                if (ph > 0)
+                                    img.height = ph;
+
+                                canvasEl.width = img.width;
+                                canvasEl.height = img.height;
+
+                                context.drawImage(img, 0, 0, img.width, img.height);
                             }
-
-                            img.width *= proportion;
-                            img.height *= proportion;
-
-//                            console.log('After resize: ' + img.width + ' ' + img.height);
-
-                            if (pw > 0 && ph > 0) {
-                                ml = -(img.width - pw) / 2;
-                                mt = -(img.height - ph) / 2;
-                            }
-
-//                            console.log('Margin: ' + ml + ' ' + mt);
-
-                            canvasEl.width = (pw > 0) ? pw : img.width;
-                            canvasEl.height = (ph > 0) ? ph : img.height;
-
-                            context.drawImage(img, ml, mt, img.width, img.height);
                         };
                         img.src = e.target.result;
                     };
