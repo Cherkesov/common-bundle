@@ -120,8 +120,8 @@
                 return image.width >= image.height;
             }
 
-            var resizerEnabled = !!'{{ preview.resizer }}';
-            pw = '{{ preview.width }}',
+            var resizerEnabled = !!'{{ preview.resizer }}',
+                    pw = '{{ preview.width }}',
                     ph = '{{ preview.height }}',
                     canvasEl = document.getElementById('{{ id }}__canvas'),
                     fileEl = document.getElementById('{{ form.binaryContent.vars.id }}');
