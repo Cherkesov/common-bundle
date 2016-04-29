@@ -7,6 +7,12 @@ services:
 #        tags:
 #            - { name: twig.extension }
 #            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException }
+    gfb.sonata.media.resizer.rectangle:
+        class: GFB\CommonBundle\SonataMediaBundle\Resizer\RectangleResizer
+        arguments:
+            - @sonata.media.adapter.image.gd
+            - @sonata.media.metadata.proxy
+
     gfb_common.view.listener:
         class: GFB\CommonBundle\EventListener\SerializedViewListener
         tags:
