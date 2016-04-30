@@ -9,10 +9,9 @@
 namespace GFB\CommonBundle\Form\Type;
 
 
-use Sonata\MediaBundle\Form\Type\MediaType;
+use GFB\CommonBundle\SonataMediaBundle\Resizer\RectangleResizer;
 use Sonata\MediaBundle\Provider\ImageProvider;
 use Sonata\MediaBundle\Provider\Pool;
-use Sonata\MediaBundle\Resizer\SquareResizer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -55,7 +54,11 @@ class ImageFileFormType extends AbstractType
         $provider = $this->mediaPool->getProvider('sonata.media.provider.image');
         $view->vars['preview']['resizer'] =
             (null != $provider->getResizer()
-                && $provider->getResizer() instanceof SquareResizer);
+                && $provider->getResizer() instanceof RectangleResizer);
+
+        if (intval($formatData['height']) == 0) {
+            $formatData['height'] = $formatData['width'];
+        }
 
         $view->vars['preview']['width'] = $formatData['width'];
         $view->vars['preview']['height'] = $formatData['height'];
