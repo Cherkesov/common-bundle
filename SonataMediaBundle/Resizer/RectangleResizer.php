@@ -44,6 +44,45 @@ class RectangleResizer implements ResizerInterface
     {
         $image = $this->adapter->load($in->getContent());
 
+        $ratio = $this->getRatio($media, $settings);
+
+        $point = new Point(
+            (int)($image->getSize()->getWidth() - $settings['width'] / $ratio) / 2,
+            (int)($image->getSize()->getHeight() - $settings['height'] / $ratio) / 2
+        );
+        $box = $this->getBox($media, $settings);
+
+        $content = $image
+            ->crop($point, $box)
+            ->thumbnail(
+                new Box($settings['width'], $settings['height']),
+                ImageInterface::THUMBNAIL_OUTBOUND
+            )
+            ->get($format, array('quality' => $settings['quality']));
+
+        $out->setContent($content, $this->metadata->get($media, $out->getName()));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getBox(MediaInterface $media, array $settings)
+    {
+        $ratio = $this->getRatio($media, $settings);
+
+        return new Box(
+            (int)($settings['width'] / $ratio),
+            (int)($settings['height'] / $ratio)
+        );
+    }
+
+    /**
+     * @param MediaInterface $media
+     * @param array $settings
+     * @return float|mixed
+     */
+    public function getRatio(MediaInterface $media, array &$settings)
+    {
         $size = $media->getBox();
         if ($settings['width'] && $settings['height']) {
             $ratios = array(
@@ -67,31 +106,6 @@ class RectangleResizer implements ResizerInterface
             );
         }
 
-        $point = new Point(
-            (int)($image->getSize()->getWidth() * $ratio - $settings['width']) / 2,
-            (int)($image->getSize()->getHeight() * $ratio - $settings['height']) / 2
-        );
-        $box = new Box($settings['width'], $settings['height']);
-
-        $content = $image
-            ->resize(
-                new Box(
-                    $size->getWidth() * $ratio,
-                    $size->getHeight() * $ratio
-                )
-            )
-            ->crop($point, $box)
-            ->thumbnail($box, ImageInterface::THUMBNAIL_OUTBOUND)
-            ->get($format, array('quality' => $settings['quality']));
-
-        $out->setContent($content, $this->metadata->get($media, $out->getName()));
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getBox(MediaInterface $media, array $settings)
-    {
-        // TODO: move code to me, please!
+        return $ratio;
     }
 }
