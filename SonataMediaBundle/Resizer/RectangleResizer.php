@@ -1,16 +1,7 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: GoForBroke
- * Date: 29.04.2016
- * Time: 19:35
- */
-
 namespace GFB\CommonBundle\SonataMediaBundle\Resizer;
 
-
 use Gaufrette\File;
-use Imagine\Exception\InvalidArgumentException;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
