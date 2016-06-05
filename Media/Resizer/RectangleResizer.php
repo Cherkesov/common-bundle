@@ -1,5 +1,5 @@
 <?php
-namespace GFB\CommonBundle\SonataMediaBundle\Resizer;
+namespace GFB\CommonBundle\Media\Resizer;
 
 use Gaufrette\File;
 use Imagine\Image\Box;

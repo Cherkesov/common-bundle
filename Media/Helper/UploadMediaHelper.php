@@ -1,27 +1,20 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: GoForBroke
- * Date: 29.03.2016
- * Time: 23:22
- */
-
-namespace GFB\CommonBundle\Helper;
-
+namespace GFB\CommonBundle\Media\Helper;
 
 use Application\Sonata\MediaBundle\Entity\Media;
+use GFB\CommonBundle\Media\HttpFoundation\HandledFile;
 use Sonata\MediaBundle\Entity\MediaManager;
-use Sonata\MediaBundle\Provider\ImageProvider;
+use Sonata\MediaBundle\Provider\FileProvider;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class UploadMediaHelper
 {
-    /** @var ContainerInterface */
-    private $container;
-
     /** @var MediaManager */
     private $mediaManager;
+
+    /** @var ContainerInterface */
+    private $container;
 
     /**
      * UploadMediaHelper constructor.
@@ -37,44 +30,32 @@ class UploadMediaHelper
      * @param UploadedFile $file
      * @param string $context
      * @param string $provider
-     * @param null $toMedia|int
      * @return Media|null
      */
-    public function upload(UploadedFile $file, $context, $provider = null, $toMedia = null)
+    public function upload($file, $context, $provider)
     {
-        $file->move(sys_get_temp_dir(), $file->getBasename());
-        if (/*!$file instanceof UploadedFile || */
-        !$file->isValid()
-        ) {
-//            return false;
+        if (!$file instanceof UploadedFile || !$file->isValid()) {
+            return false;
         }
 
-        if (null == $toMedia) {
-            $media = new Media();
-        } else {
-            $media = $this->mediaManager->find($toMedia);
-        }
+        $media = new Media();
         $media->setBinaryContent($file);
         $media->setContext($context);
         $media->setProviderName($provider);
 
-        if (null == $provider) {
-            $imageMimeTypes = array('image/jpeg', 'image/png', 'image/gif');
-            $fileMimeTypes = array(
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'application/msword',
-                'application/pdf',
-                'application/x-pdf',
-            );
-            if (in_array($file->getMimeType(), $fileMimeTypes)) {
-                $media->setProviderName('sonata.media.provider.file');
-            }
-            if (in_array($file->getMimeType(), $imageMimeTypes)) {
-                $media->setProviderName('sonata.media.provider.image');
-            }
-        } else {
-            $media->setProviderName($provider);
+        /*$imageMimeTypes = array('image/jpeg', 'image/png', 'image/gif');
+        $fileMimeTypes = array(
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/msword',
+            'application/pdf',
+            'application/x-pdf'
+        );
+        if (in_array($file->getMimeType(), $fileMimeTypes)) {
+            $media->setProviderName('sonata.media.provider.file');
         }
+        if (in_array($file->getMimeType(), $imageMimeTypes)) {
+            $media->setProviderName($provider);
+        }*/
 
         $this->mediaManager->save($media);
 
@@ -96,7 +77,7 @@ class UploadMediaHelper
 
             $media = new Media();
             $media->setBinaryContent(
-                new UploadedFile($tempFile, basename($tempFile), null, null, null, true)
+                new HandledFile($tempFile)
             );
             $media->setContext($context);
             $media->setProviderName('sonata.media.provider.image');
@@ -121,7 +102,7 @@ class UploadMediaHelper
             return '';
         }
 
-        /** @var ImageProvider $provider */
+        /** @var FileProvider $provider */
         $provider = $this->container->get($media->getProviderName());
         $format = $provider->getFormatName($media, $format);
 
